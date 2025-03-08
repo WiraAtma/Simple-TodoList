@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+</head>
+<body>
+    <div id="app">
+        <div>
+            <form action="" @submit.prevent="" style="display: flex; gap: 10px;">
+                <div>
+                    <label for="startTime">Jam Mulai</label> <br>
+                    <input type="time" name="startTime" id="startTime" v-model="startTime"> <br>
+                    <label for="startTime" style="color: red;" v-if="checkStartTime">Tidak Bisa Lebih dari Jam berakhir</label>
+                </div>
+                <div>
+                    <label for="endTime">Jam Berakhir</label> <br>
+                    <input type="time" name="endTime" id="endTime" v-model="endTime"> <br>
+                    <label for="endTime" style="color: red;" v-if="checkEndTime">Tidak Bisa Kurang dari Jam Mulai</label>
+                </div>
+                <div>
+                    <label for="name">Todo</label> <br>
+                    <input type="text" name="name" id="name" v-model="name"> <br>
+                    <label for="name" style="color: red;" v-if="checkName">Minimal 3 Kata</label>
+                </div>
+                <div>
+                    <button v-on:click="handleSave">Simpan</button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <ul>
+                <li v-for="(todo) in todos" :key="todo.id">
+                    <s v-if="todo.status == true">{{  `${todo.startTime} - ${todo.endTime} : ${todo.name}` }}</s>
+                    <span v-else>{{  `${todo.startTime} - ${todo.endTime} : ${todo.name}` }}</span>
+                    <button @click="handleDone(todo.id)">Done</button>
+                    <button @click="handleDelete(todo.id)">Delete</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        import {createApp} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+        createApp({
+            data() {
+                return {
+                    startTime: '',
+                    endTime: '',
+                    name: '',
+                    status: false,
+                    checkName: false,
+                    checkStartTime: false,
+                    checkEndTime: false,
+                    todos : [
+                        {id: 1, name: "Makan", startTime: '13:00', endTime: '14:00', status: false},
+                        {id: 2, name: "Tidur", startTime: '24:00', endTime: '8:00', status: false},
+                        {id: 3, name: "Game", startTime: '10:00', endTime: '12:00', status: false},
+                    ]
+                }
+            },
+            methods: {
+                handleSave() {
+                    this.todos.push({
+                        id: Date.now(),
+                        name: this.name,
+                        startTime: this.startTime,
+                        endTime: this.endTime,
+                        status: false,
+                    });
+                }, 
+                handleDone(index) {
+                    let number = this.todos.findIndex((todo) => todo.id === index);
+                    this.todos[number].status = true;
+                },
+                handleDelete(index) {
+                    let number = this.todos.findIndex((todo) => todo.id === index);
+                    this.todos.splice(number,1);
+                }
+            },
+            watch : {
+                name(value) {
+                    if(value.length < 3) {
+                        this.checkName = true;
+                    } else {
+                        this.checkName = false;
+                    }
+                },
+                startTime(value) {
+                    if(this.endTime != '') {
+                        if(value > this.endTime) {
+                            this.checkStartTime = true;
+                        } else {
+                            this.checkStartTime = false;
+                        }
+                    }
+                },
+                endTime(value) {
+                    if(this.startTime != '') {
+                    if(value < this.startTime) {
+                        this.checkEndTime = true;
+                    } else {
+                        this.checkEndTime = false;
+                    }
+                    }
+                }
+            }
+
+        }).mount('#app')
+    </script>
+</body>
+</html>
